@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>高校入試英単語クイズ</title>
+  <style>
+    body {
+      font-family: "Arial", sans-serif;
+      text-align: center;
+      padding: 20px;
+      background: #fdf6ec;
+      color: #333;
+    }
+    h1 { font-size: 2.4rem; margin-bottom: 20px; }
+    #quiz-container { font-size: 2rem; margin-top: 20px; }
+    button {
+      display: block;
+      margin: 10px auto;
+      font-size: 1.8rem;
+      padding: 15px 25px;
+      border: none;
+      border-radius: 12px;
+      background: #6fb3f2;
+      color: white;
+      cursor: pointer;
+      width: 80%;
+      max-width: 400px;
+    }
+    button:hover { background: #5aa3e6; }
+    #timer { font-size: 2rem; margin: 15px; }
+    #result-container { font-size: 1.8rem; margin-top: 30px; }
+    .small { font-size: 1.4rem; color: #555; }
+  </style>
+</head>
+<body>
+
+  <h1>高校入試英単語クイズ</h1>
+
+  <div id="top-screen">
+    <p style="font-size:1.8rem;">3分間でできるだけ多く正解しよう！</p>
+    <button id="start-btn">スタート</button>
+    <div id="stats" class="small"></div>
+  </div>
+
+  <div id="quiz-container" style="display:none;">
+    <div id="timer">残り時間: 3:00</div>
+    <div id="question"></div>
+    <div id="choices"></div>
+  </div>
+
+  <div id="result-container" style="display:none;"></div>
+
+  <script>
+    const questions = [
+      { word: "apple", answer: "りんご" }, { word: "study", answer: "勉強する" },
+      { word: "beautiful", answer: "美しい" }, { word: "difficult", answer: "難しい" },
+      { word: "easy", answer: "やさしい" }, { word: "family", answer: "家族" },
+      { word: "happy", answer: "幸せな" }, { word: "music", answer: "音楽" },
+      { word: "school", answer: "学校" }, { word: "teacher", answer: "先生" },
+      { word: "dog", answer: "犬" }, { word: "cat", answer: "猫" }, { word: "bird", answer: "鳥" },
+      { word: "mountain", answer: "山" }, { word: "river", answer: "川" }, { word: "sea", answer: "海" },
+      { word: "car", answer: "車" }, { word: "bus", answer: "バス" }, { word: "train", answer: "電車" },
+      { word: "walk", answer: "歩く" }, { word: "run", answer: "走る" }, { word: "swim", answer: "泳ぐ" },
+      { word: "read", answer: "読む" }, { word: "write", answer: "書く" }, { word: "speak", answer: "話す" },
+      { word: "listen", answer: "聞く" }, { word: "see", answer: "見る" }, { word: "eat", answer: "食べる" },
+      { word: "drink", answer: "飲む" }, { word: "sleep", answer: "眠る" }, { word: "friend", answer: "友達" },
+      { word: "city", answer: "都市" }, { word: "country", answer: "国" }, { word: "morning", answer: "朝" },
+      { word: "night", answer: "夜" }, { word: "day", answer: "日" }, { word: "time", answer: "時間" },
+      { word: "book", answer: "本" }, { word: "pen", answer: "ペン" }, { word: "desk", answer: "机" },
+      { word: "chair", answer: "いす" }, { word: "door", answer: "ドア" }, { word: "window", answer: "窓" },
+      { word: "flower", answer: "花" }, { word: "tree", answer: "木" }, { word: "grass", answer: "草" },
+      { word: "rain", answer: "雨" }, { word: "snow", answer: "雪" }, { word: "wind", answer: "風" },
+      { word: "sun", answer: "太陽" }, { word: "moon", answer: "月" }, { word: "star", answer: "星" },
+      { word: "warm", answer: "あたたかい" }, { word: "cold", answer: "寒い" }, { word: "hot", answer: "暑い" },
+      { word: "new", answer: "新しい" }, { word: "old", answer: "古い" }, { word: "big", answer: "大きい" },
+      { word: "small", answer: "小さい" }, { word: "long", answer: "長い" }, { word: "short", answer: "短い" },
+      { word: "good", answer: "良い" }, { word: "bad", answer: "悪い" }, { word: "kind", answer: "親切な" },
+      { word: "strong", answer: "強い" }, { word: "weak", answer: "弱い" }, { word: "fast", answer: "速い" },
+      { word: "slow", answer: "遅い" }, { word: "clean", answer: "きれいな" }, { word: "dirty", answer: "汚い" },
+      { word: "open", answer: "開ける" }, { word: "close", answer: "閉める" }, { word: "buy", answer: "買う" },
+      { word: "use", answer: "使う" }, { word: "make", answer: "作る" }, { word: "play", answer: "遊ぶ" },
+      { word: "laugh", answer: "笑う" }, { word: "cry", answer: "泣く" }, { word: "help", answer: "助ける" },
+      { word: "study", answer: "勉強する" }, { word: "travel", answer: "旅行する" },
+      { word: "understand", answer: "理解する" }, { word: "remember", answer: "覚えている" },
+      { word: "forget", answer: "忘れる" }, { word: "love", answer: "愛する" }, { word: "like", answer: "好き" },
+      { word: "hate", answer: "嫌う" }, { word: "hope", answer: "望む" }, { word: "know", answer: "知る" },
+      { word: "think", answer: "考える" }, { word: "believe", answer: "信じる" }, { word: "smile", answer: "ほほえむ" },
+      { word: "question", answer: "質問" }, { word: "answer", answer: "答え" }, { word: "story", answer: "物語" },
+      { word: "movie", answer: "映画" }, { word: "game", answer: "ゲーム" }, { word: "sport", answer: "スポーツ" },
+      { word: "music", answer: "音楽" }, { word: "song", answer: "歌" }, { word: "picture", answer: "絵" },
+      { word: "letter", answer: "手紙" }
+    ];
+
+    const topScreen = document.getElementById("top-screen");
+    const quizContainer = document.getElementById("quiz-container");
+    const resultContainer = document.getElementById("result-container");
+    const timerEl = document.getElementById("timer");
+    const questionEl = document.getElementById("question");
+    const choicesEl = document.getElementById("choices");
+    const statsEl = document.getElementById("stats");
+
+    let timer, timeLeft, currentIndex, score, shuffledQuestions;
+
+    function startQuiz() {
+      topScreen.style.display = "none";
+      resultContainer.style.display = "none";
+      quizContainer.style.display = "block";
+      score = 0;
+      currentIndex = 0;
+      timeLeft = 180;
+      shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
+      showQuestion();
+      startTimer();
+    }
+
+    function startTimer() {
+      updateTimerDisplay();
+      timer = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay();
+        if (timeLeft <= 0) endQuiz();
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const min = Math.floor(timeLeft / 60);
+      const sec = timeLeft % 60;
+      timerEl.textContent = `残り時間: ${min}:${sec.toString().padStart(2, "0")}`;
+    }
+
+    function showQuestion() {
+      if (currentIndex >= shuffledQuestions.length) return endQuiz();
+      const q = shuffledQuestions[currentIndex];
+      const wrongChoices = [...questions]
+        .filter(x => x.answer !== q.answer)
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 3)
+        .map(x => x.answer);
+      const allChoices = [q.answer, ...wrongChoices].sort(() => Math.random() - 0.5);
+      questionEl.textContent = `${currentIndex + 1}. ${q.word}`;
+      choicesEl.innerHTML = "";
+      allChoices.forEach(choice => {
+        const btn = document.createElement("button");
+        btn.textContent = choice;
+        btn.onclick = () => handleAnswer(choice === q.answer);
+        choicesEl.appendChild(btn);
+      });
+    }
+
+    function handleAnswer(correct) {
+      if (correct) score++;
+      currentIndex++;
+      showQuestion();
+    }
+
+    function endQuiz() {
+      clearInterval(timer);
+      quizContainer.style.display = "none";
+      resultContainer.style.display = "block";
+
+      // 累計プレイ回数
+      let total = parseInt(localStorage.getItem("playCount") || "0") + 1;
+      localStorage.setItem("playCount", total);
+
+      // ベスト3保存
+      const now = new Date();
+      const formatted = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")} ${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+      const record = { score, date: formatted };
+      let best = JSON.parse(localStorage.getItem("bestScores") || "[]");
+      best.push(record);
+      best.sort((a,b) => b.score - a.score);
+      best = best.slice(0,3);
+      localStorage.setItem("bestScores", JSON.stringify(best));
+
+      const messages = ["よく頑張りました！","集中力が素晴らしい！","継続は力なり！","確実に力がついています！"];
+      const msg = messages[Math.floor(Math.random()*messages.length)];
+
+      let bestText = "🏆 あなたのベスト3\n";
+      best.forEach((b,i)=>{
+        bestText += `${i+1}位：${b.score}問（${b.date}）\n`;
+      });
+
+      resultContainer.innerHTML = `
+        <p>⏰ 時間切れ！</p>
+        <p>今回の正解数：${score}問</p>
+        <p>${msg}</p>
+        <pre style="text-align:left; margin:10px auto; display:inline-block;">${bestText}</pre>
+        <p class="small">累計プレイ回数：${total}回</p>
+        <button onclick="startQuiz()">もう一度挑戦</button>
+        <button onclick="goHome()">トップ画面に戻る</button>
+      `;
+    }
+
+    function goHome() {
+      resultContainer.style.display = "none";
+      topScreen.style.display = "block";
+      updateStats();
+    }
+
+    function updateStats() {
+      const total = localStorage.getItem("playCount") || 0;
+      const best = JSON.parse(localStorage.getItem("bestScores") || "[]");
+      let text = `累計プレイ回数：${total}回<br>`;
+      if (best.length > 0) {
+        text += "最高記録：" + best[0].score + "問（" + best[0].date + "）";
+      }
+      statsEl.innerHTML = text;
+    }
+
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    updateStats();
+  </script>
+</body>
+</html>
